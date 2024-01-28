@@ -55,7 +55,7 @@ function App() {
   let handleSearchBar = async (value) => {
     try {
       const response = await fetch(
-        `${apiEndpoint}?sort=createdAt ${value !== '' && `&keyword=${value}`} `
+        `${apiEndpoint}?sort=createdAt${value !== '' && `&keyword=${value}`} `
       );
 
       if (response.ok) {
