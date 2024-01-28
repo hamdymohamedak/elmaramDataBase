@@ -1,18 +1,20 @@
-import { useEffect, useState } from 'react'
-import './assets/main.css'
-import ElmaramLogo from './assets/maram.jpg'
+import { useEffect, useState } from 'react';
+import './assets/main.css';
+import ElmaramLogo from './assets/maram.jpg';
 
 function App() {
-  const [inputName, setInputName] = useState('')
-  const [inputAddress, setInputAddress] = useState('')
-  const [inputPhone, setInputPhone] = useState('')
-  const [dataFetching, setDataFetching] = useState([])
+  const [inputName, setInputName] = useState('');
+  const [inputAddress, setInputAddress] = useState('');
+  const [inputPhone, setInputPhone] = useState('');
+  const [dataFetching, setDataFetching] = useState([]);
+  const [nameOutput, setNameOutput] = useState('');
 
-  const api = 'https://pharmacy-api-5i0h.onrender.com/api/v1/users'
+  // Consider using a more descriptive variable name for the API endpoint
+  const apiEndpoint = 'https://pharmacy-api-5i0h.onrender.com/api/v1/users';
 
   const handleAdd = async () => {
     try {
-      const response = await fetch(api, {
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8'
@@ -22,69 +24,51 @@ function App() {
           address: inputAddress,
           phone: inputPhone
         })
-      })
+      });
 
       if (response.ok) {
-        const json = await response.json()
-        console.log(json)
-        window.location.reload()
-        // Perform any additional actions if needed
+        const json = await response.json();
+        console.log(json);
+        window.location.reload();
+        // Consider using React state to update data instead of reloading the page
+        // Update state to include the new data without a page reload
       } else {
-        console.error('Error:', response.status, response.statusText)
+        console.error('Error:', response.status, response.statusText);
       }
     } catch (error) {
-      console.error('Error:', error.message)
+      console.error('Error:', error.message);
     }
-  }
+  };
 
   useEffect(() => {
-    fetch(`https://pharmacy-api-5i0h.onrender.com/api/v1/users?fields=-_id,-password`)
+    fetch(`${apiEndpoint}?fields=-password`)
       .then((res) => res.json())
       .then((json) => {
-        console.log(json)
-        setDataFetching(Array.isArray(json) ? json : []) // Ensure json is an array
+        console.log(json);
+        setDataFetching(Array.isArray(json) ? json : []); // Ensure json is an array
       })
       .catch((error) => {
-        console.error('Error:', error.message)
-      })
-  }, [])
-
-  let handleDelete = async () => {
-    try {
-      const response = await fetch(
-        `https://pharmacy-api-5i0h.onrender.com/api/v1/users?page=2&limit=5&sort=name&keyword=${inputName}`,
-        {
-          method: 'DELETE'
-        }
-      )
-
-      if (response.ok) {
-        console.log('Deletion successful')
-        // Perform any additional actions if needed
-      } else {
-        console.error('Error:', response.status, response.statusText)
-      }
-    } catch (error) {
-      console.error('Error:', error.message)
-    }
-  }
+        console.error('Error:', error.message);
+      });
+  }, []);
 
   let handleSearchBar = async (value) => {
     try {
       const response = await fetch(
-        `https://pharmacy-api-5i0h.onrender.com/api/v1/users?page=2&limit=5&sort=name&keyword=${value}`
-      )
+        `${apiEndpoint}?sort=createdAt ${value !== '' && `&keyword=${value}`} `
+      );
 
       if (response.ok) {
-        const json = await response.json()
-        setDataFetching(Array.isArray(json) ? json : [])
+        const json = await response.json();
+        setNameOutput(json);
       } else {
-        console.error('Error:', response.status, response.statusText)
+        console.error('Error:', response.status, response.statusText);
       }
     } catch (error) {
-      console.error('Error:', error.message)
+      console.error('Error:', error.message);
     }
-  }
+  };
+
 
   return (
     <>
@@ -102,6 +86,17 @@ function App() {
               <div>Name: {info.name}</div>
               <div>Address: {info.address}</div>
               <div>Phone: {info.phone}</div>
+              <button
+                onClick={() => {
+                  fetch(`${apiEndpoint}/${info.id}`, {
+                    method: 'DELETE'
+                  });
+                }}
+                className="btn"
+              >
+                حذف
+              </button>
+              {console.log(info.id)}
             </div>
           ))}
         </div>
@@ -131,15 +126,11 @@ function App() {
             <button className="btn" onClick={handleAdd}>
               اضافه
             </button>
-            <button onClick={handleDelete} className="btn">
-              حذف
-            </button>
-            <button className="btn">تعديل</button>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
